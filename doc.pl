@@ -2,8 +2,8 @@ use strict;
 use warnings;
 use WWW::Mechanize;
 use LWP::UserAgent;
-use Kubera::Kubera qw(read_file error_msg_clean_up);
-my ($c, $response, $count, $AUTOUPDATESITE, $AUTOUPDATEIO, $AUTOUPDATEHTTP, $check_stat);
+use Kubera::Kubera qw(error_msg_clean_up);
+my ($c, $response, $count, $AUTOUPDATESITE, $AUTOUPDATEIO, $AUTOUPDATEHTTP);
 my $OUTPUTFILENAME = '';
 my $mech = WWW::Mechanize->new();
 
@@ -11,12 +11,19 @@ sub main {
     debug_print ("Inside main");
     debug_print ("Getting moneycontrol page");
     mechGet("https://www.moneycontrol.com/india/stockpricequote/diversified/3mindia/MI42");
-    Values();
-	my $table;
+    my $table = '';
+	if ( $c =~ /pivot\s+levels.*?<tbody>(.*?)<\/table>/is ) { #Matching the table with regex 
+		$table = $1; #If the regex matches table will be stored in $1
+		print $table."\n"; #printing the content table
+	} else {
+		print "Table not found"; #Prints this msg if $c is does not match with the regex.
+	}
+
     my @rows = $table =~ /<tr.*?>(.*?)<\/tr>/gis; #Matching the rows with the regex from the table 
-    foreach my $row(@rows) { #Getting all the rows from the table using array foreach loop
-        my @cols; #Declaring array cols
-        @cols = $row =~ /<td.*?>\s*(.*?)\s*<\/td>/gis; #Matching all the columns with the each rows from the table using regex (.*?)-> will capture the values or contents between start and end tags[dot(.) denotes alphabet, Number, Space and Character/ * denotes 0,1/ ? denotes optional]
+	my $values;
+    for( my $i = 0; $i < scalar(@rows); $i++) { #Getting all the rows from the table using array foreach loop
+		next if ($rows[$i] =~ /Type.*?R1.*?R2.*?R3.*?PP.*?S1.*?S2.*?S3/is);
+        my @cols = $rows[$i] =~ /<td.*?>\s*(.*?)\s*<\/td>/gis; #Matching all the columns with the each rows from the table using regex (.*?)-> will capture the values or contents between start and end tags[dot(.) denotes alphabet, Number, Space and Character/ * denotes 0,1/ ? denotes optional]
 		my $Type = clean_up($cols[0]);
 		my $R1 = clean_up($cols[1]);
 		my $R2 = clean_up($cols[2]);
@@ -25,19 +32,10 @@ sub main {
 		my $S1 = clean_up($cols[5]);
 		my $S2 = clean_up($cols[6]);
 		my $S3 = clean_up($cols[7]);
-    } 
+		$values .= $Type.",".$R1.",".$R2.",".$R3.",".$PP.",".$S1.",".$S2.",".$S3."\n";
+    }
+	print "$values\n"; 
 }
-
-sub Values {
-	my $table = '';
-	if ( $c =~ /pivot\s+levels.*?<tbody>(.*?)<\/table>/is ) { #Matching the table with regex 
-		$table = $1; #If the regex matches table will be stored in $1
-		print $table."\n"; #printing the content table
-	} else {
-		print "Table not found"; #Prints this msg if $c is does not match with the regex.
-	}
-}
-
 sub mechGet {
     my ($link) = @_;
     debug_print("Getting URL $link");
