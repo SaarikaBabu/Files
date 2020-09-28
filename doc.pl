@@ -2,6 +2,7 @@ use strict;
 use warnings;
 use WWW::Mechanize;
 use LWP::UserAgent;
+use Data::Dumper;
 use Kubera::Kubera qw(error_msg_clean_up);
 my ($c, $response, $count, $AUTOUPDATESITE, $AUTOUPDATEIO, $AUTOUPDATEHTTP);
 my $OUTPUTFILENAME = '';
@@ -34,8 +35,9 @@ sub main {
 		my $S3 = clean_up($cols[7]);
 		$values .= $Type.",".$R1.",".$R2.",".$R3.",".$PP.",".$S1.",".$S2.",".$S3."\n";
     }
-	print "$values\n"; 
+	print "$values.\n"; 
 }
+
 sub mechGet {
     my ($link) = @_;
     debug_print("Getting URL $link");
@@ -95,5 +97,4 @@ sub print_error {
     }
     print $ERROR. " $err_type $message\n";
 }
-
 
