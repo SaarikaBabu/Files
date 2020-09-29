@@ -54,12 +54,12 @@ sub scrape_table {
 		$data->{$Type}->{"S2"} = $S2;
 		$data->{$Type}->{"S3"} = $S3;
 	}
-	print_data();
+	print_value();
 }
 
-sub print_data {
+sub print_value {
 	my $json = encode_json($data);
-	print "JSON $json\n";
+	print "$json\n";
 }
 
 sub mechGet {
@@ -78,7 +78,7 @@ sub clean_up {
 
 sub dump_file {
     my $filename = $OUTPUTFILENAME . $count . ".html";#will dump file with html count in current dir eg output1.html,output2.html
-    open( OUTFILE, ">$filename" ) or error_exit ( $AUTOUPDATEIO, "Can't open $filename: $!" , 1);
+    open( OUTFILE, ">$filename" ) or error_exit ( $AUTOUPDATEIO, "Can't open $filename: $!");
     binmode(OUTFILE, ":utf8");
     print OUTFILE $c;
     close OUTFILE;
